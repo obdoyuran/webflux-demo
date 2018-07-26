@@ -1,16 +1,17 @@
 package com.trendyol.webFluxDemo.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -18,6 +19,7 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class City {
 
     @Id
@@ -25,6 +27,6 @@ public class City {
     private Long id;
     @Column
     private String name;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "city")
-    private Set<County> counties;
+    @OneToMany(mappedBy = "city")
+    private Set<County> counties = new HashSet<>();
 }
