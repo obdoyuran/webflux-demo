@@ -33,7 +33,8 @@ public class CityServiceImpl implements CityService {
     @Override
     public Flux<City> listCities() {
         log.info("Thread {}:{}", Thread.currentThread().getName(), Thread.currentThread().getId());
-        return Flux.defer(() -> Flux.fromIterable(cityRepositoryJdbc.listCities()))
+        return Flux.defer(() -> Flux.fromIterable(cityRepository.findAll()))
+                .subscribeOn(scheduler)
                 .publishOn(scheduler)
                 .switchIfEmpty(Mono.error(new NotFoundException("City not found")));
     }
@@ -41,6 +42,7 @@ public class CityServiceImpl implements CityService {
     @Override
     public Mono<City> getCityById(Long id) {
         return Mono.defer(() -> Mono.justOrEmpty(cityRepository.findById(id)))
+                .subscribeOn(scheduler)
                 .publishOn(scheduler)
                 .switchIfEmpty(Mono.error(new NotFoundException("City not found")));
     }
@@ -49,6 +51,7 @@ public class CityServiceImpl implements CityService {
     public Mono<City> saveCity(Mono<City> city) {
         return city
                 .map(cityRepository::save)
+                .subscribeOn(scheduler)
                 .publishOn(scheduler);
     }
 
@@ -56,6 +59,7 @@ public class CityServiceImpl implements CityService {
     public Mono<City> updateCity(Mono<City> newCity) {
         log.info("Thread {}:{}", Thread.currentThread().getName(), Thread.currentThread().getId());
         return newCity
+                .subscribeOn(scheduler)
                 .publishOn(scheduler)
                 .zipWhen(c -> getCityById(c.getId()), this::convertUpdateRequest)
                 .map(cityRepository::save);
